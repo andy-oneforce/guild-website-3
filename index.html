@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guild Professional Networks · Evening salon · A free, peer-led community</title>
+  <meta name="description" content="Guild is a free, peer-led community where leaders and professionals learn from peers who've already done it. No sales pitch, no paid program." />
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       1. TOKENS — Evening salon: ink-navy room, lamplight accent.
+       ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      --bg:      oklch(17% 0.025 260);
+      --surface: oklch(21% 0.028 260);
+      --fg:      oklch(94% 0.012 85);
+      --muted:   oklch(72% 0.018 250);
+      --border:  oklch(31% 0.026 260);
+      --accent:  oklch(82% 0.11 82);
+
+      /* derived */
+      --accent-soft: color-mix(in oklch, var(--accent) 16%, transparent);
+      --accent-glow: color-mix(in oklch, var(--accent) 22%, transparent);
+      --fg-soft:     color-mix(in oklch, var(--fg) 7%, transparent);
+      --on-accent:   var(--bg);
+
+      --font-display: 'Iowan Old Style', 'Charter', Georgia, serif;
+      --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+      --fs-h1: clamp(44px, 6.4vw, 92px);
+      --fs-h2: clamp(34px, 4.4vw, 60px);
+      --fs-h3: 21px;
+      --fs-lead: clamp(17px, 1.4vw, 20px);
+
+      --gutter: clamp(20px, 4vw, 48px);
+      --rail: 250px;
+      --nav-h: 64px;
+      --radius: 4px;
+    }
+
+    /* ═══ 2. BASE ═════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; color-scheme: dark; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+    body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; color: inherit; }
+    p { text-wrap: pretty; margin: 0; }
+    h1, h2, h3, h4 { text-wrap: balance; margin: 0; font-family: var(--font-display); font-weight: 400; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .skip { position: absolute; left: -999px; top: 8px; background: var(--fg); color: var(--bg); padding: 8px 14px; z-index: 50; }
+    .skip:focus { left: 8px; }
+
+    h1 { font-size: var(--fs-h1); line-height: 1; letter-spacing: -0.02em; }
+    h2 { font-size: var(--fs-h2); line-height: 1.05; letter-spacing: -0.015em; }
+    h3 { font-size: var(--fs-h3); line-height: 1.3; }
+    em { font-style: italic; }
+    .lead { font-size: var(--fs-lead); color: var(--muted); max-width: 58ch; }
+    .meta { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+    .soft { color: var(--muted); }
+
+    /* ═══ 3. CHROME — top bar, drawer ═════════════════════════════════ */
+    .topnav { position: sticky; top: 0; z-index: 20; height: var(--nav-h); background: color-mix(in oklch, var(--bg) 82%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+    .topnav-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-inline: var(--gutter); }
+    .logo { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 21px; }
+    .logo small { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .logo-mark { width: 28px; height: 28px; }
+    .now { flex: 1; text-align: center; font-family: var(--font-display); font-style: italic; color: var(--muted); font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transition: opacity .25s; }
+    .now.on { opacity: 1; }
+    .now .num { font-style: normal; font-size: 12px; margin-right: 8px; color: var(--accent); }
+    .nav-actions { display: flex; gap: 8px; align-items: center; }
+    .menu-btn { display: none; width: 44px; height: 44px; border: 1px solid var(--border); background: transparent; border-radius: var(--radius); place-items: center; }
+    .menu-btn svg { width: 20px; height: 20px; }
+    .drawer { display: none; }
+    @media (max-width: 1099px) {
+      .nav-actions .btn { display: none; }
+      .menu-btn { display: grid; }
+      .drawer { display: block; position: fixed; inset: var(--nav-h) 0 auto 0; max-height: calc(100dvh - var(--nav-h)); overflow-y: auto; background: var(--surface); border-bottom: 1px solid var(--border); padding: 8px var(--gutter) 24px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .18s, transform .18s; z-index: 19; }
+      .drawer.open { opacity: 1; transform: none; pointer-events: auto; }
+      .drawer a { display: flex; gap: 14px; align-items: baseline; min-height: 48px; padding: 12px 0; border-bottom: 1px solid var(--border); font-family: var(--font-display); font-size: 19px; }
+      .drawer a .num { font-size: 12px; color: var(--muted); width: 28px; flex: none; }
+      .drawer .btn { width: 100%; margin-top: 14px; }
+    }
+    @media (max-width: 640px) { .now { display: none; } .logo small { display: none; } }
+
+    /* ═══ 4. BUTTONS ══════════════════════════════════════════════════ */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 11px 22px; border-radius: 999px; border: 1px solid transparent; font-size: 15px; font-weight: 600; white-space: nowrap; transition: background .15s, border-color .15s, color .15s, box-shadow .2s; }
+    .btn-primary { background: var(--accent); color: var(--on-accent); }
+    .btn-primary:hover { box-shadow: 0 0 0 6px var(--accent-soft); }
+    .btn-secondary { background: transparent; border-color: color-mix(in oklch, var(--fg) 30%, transparent); }
+    .btn-secondary:hover { border-color: var(--fg); background: var(--fg-soft); }
+    .btn-sm { min-height: 38px; padding: 7px 16px; font-size: 14px; }
+
+    /* ═══ 5. BOOK LAYOUT — chapter rail + text column ═════════════════ */
+    .book { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); }
+    .rail { position: sticky; top: var(--nav-h); align-self: start; height: calc(100dvh - var(--nav-h)); padding: 40px 0 32px var(--gutter); display: flex; flex-direction: column; }
+    .rail .meta { margin-bottom: 18px; }
+    .toc { list-style: none; margin: 0; padding: 0; position: relative; }
+    .toc::before { content: ''; position: absolute; left: 5px; top: 10px; bottom: 10px; width: 1px; background: var(--border); }
+    .toc a { position: relative; display: grid; grid-template-columns: 11px 26px 1fr; gap: 10px; align-items: baseline; padding: 6px 0; font-size: 14px; color: var(--muted); transition: color .2s; }
+    .toc a:hover { color: var(--fg); }
+    .toc .seat { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--muted); background: var(--bg); align-self: center; transition: background .3s, border-color .3s, box-shadow .3s; }
+    .toc .num { font-size: 11px; color: var(--muted); }
+    .toc a.read .seat { background: var(--fg); border-color: var(--fg); }
+    .toc a[aria-current="true"] { color: var(--fg); }
+    .toc a[aria-current="true"] .seat { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+    .rail-foot { margin-top: auto; padding-top: 24px; font-size: 13px; color: var(--muted); max-width: 22ch; }
+    .rail-foot strong { color: var(--fg); font-weight: 500; }
+    @media (max-width: 1099px) { .book { grid-template-columns: 1fr; } .rail { display: none; } }
+
+    .text { min-width: 0; border-left: 1px solid var(--border); }
+    @media (max-width: 1099px) { .text { border-left: 0; } }
+    .chapter { padding: clamp(72px, 10vw, 136px) var(--gutter); scroll-margin-top: var(--nav-h); border-top: 1px solid var(--border); }
+    .chapter > .inner { max-width: 940px; }
+    .ch-head { display: grid; grid-template-columns: auto 1fr; gap: 6px 28px; align-items: baseline; margin-bottom: clamp(36px, 5vw, 64px); }
+    .ch-num { font-family: var(--font-display); font-style: italic; font-size: clamp(22px, 2.4vw, 30px); color: var(--muted); min-width: 2.4em; }
+    .ch-head .meta { grid-column: 2; }
+    .ch-head h2 { grid-column: 2; }
+    .ch-head .lead { grid-column: 2; margin-top: 14px; }
+    @media (max-width: 640px) { .ch-head { grid-template-columns: 1fr; } .ch-head > * { grid-column: 1 !important; } }
+
+    /* ═══ 6. TITLE PAGE — spotlight + table ═══════════════════════════ */
+    .title-page { position: relative; padding: clamp(56px, 8vw, 112px) var(--gutter) clamp(72px, 9vw, 120px); overflow: hidden; border-top: 0; }
+    .title-page::before { content: ''; position: absolute; right: -10%; top: -20%; width: 80%; aspect-ratio: 1; background: radial-gradient(closest-side, var(--accent-glow), transparent 70%); pointer-events: none; }
+    .title-grid { position: relative; display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+    .title-page .meta.kicker { color: var(--accent); margin-bottom: 26px; }
+    .title-page h1 em { color: var(--muted); }
+    .title-page .lead { margin-top: 26px; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+    .assure { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 14px; color: var(--muted); }
+    .assure span::before { content: '— '; color: var(--border); }
+    .table-wrap { position: relative; width: 100%; max-width: 460px; margin-inline: auto; }
+    .table-svg { width: 100%; height: auto; overflow: visible; }
+    .table-svg .tbl { fill: color-mix(in oklch, var(--surface) 80%, transparent); stroke: var(--border); }
+    .table-svg .pool { fill: url(#lamp); }
+    .table-svg .seat { fill: var(--fg); opacity: 0; transform-box: fill-box; transform-origin: center; animation: seat-in .6s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(.4s + var(--i) * .12s); }
+    .table-svg .seat.mine { fill: transparent; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 4; animation-delay: 2s; }
+    .table-svg .center-t { font-family: var(--font-display); font-style: italic; fill: var(--fg); }
+    .table-svg .center-s { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; fill: var(--muted); }
+    .table-svg .your-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; fill: var(--accent); opacity: 0; animation: fade .4s 2.3s forwards; }
+    @keyframes seat-in { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fade { to { opacity: 1; } }
+    .invite { margin-top: 26px; border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in oklch, var(--surface) 70%, transparent); padding: 16px 18px; display: flex; gap: 16px; align-items: center; }
+    .invite .when { flex: none; text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; line-height: 1.4; text-transform: uppercase; color: var(--muted); border-right: 1px solid var(--border); padding-right: 16px; }
+    .invite strong { display: block; font-family: var(--font-display); font-weight: 400; font-size: 18px; line-height: 1.25; }
+    .invite .btn { margin-left: auto; }
+    @media (max-width: 920px) { .title-grid { grid-template-columns: 1fr; } .table-wrap { max-width: 380px; } }
+    @media (max-width: 480px) { .cta-row .btn { flex: 1 1 100%; } .invite { flex-wrap: wrap; } .invite .btn { margin-left: 0; width: 100%; } }
+
+    /* ═══ 7. CHAPTER MODULES ══════════════════════════════════════════ */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 56px); }
+    .two-col p { color: var(--muted); font-size: 17px; }
+    .two-col p:first-child::first-letter { font-family: var(--font-display); float: left; font-size: 64px; line-height: .85; padding: 6px 10px 0 0; color: var(--fg); }
+    @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* barriers */
+    .barriers { list-style: none; margin: 0; padding: 0; }
+    .barriers li { display: grid; grid-template-columns: 60px 1fr auto; gap: 20px; align-items: baseline; padding: 26px 0; border-top: 1px solid var(--border); }
+    .barriers li:last-child { border-bottom: 1px solid var(--border); }
+    .barriers h3 { font-size: clamp(24px, 3vw, 38px); line-height: 1.15; display: inline; background-image: linear-gradient(var(--muted), var(--muted)); background-size: 0% 1.5px; background-position: 0 60%; background-repeat: no-repeat; transition: background-size .8s cubic-bezier(.6,0,.2,1), color .8s; }
+    .barriers li.struck h3 { background-size: 100% 1.5px; color: var(--muted); }
+    .barriers .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); opacity: 0; transition: opacity .4s .5s; }
+    .barriers li.struck .tag { opacity: 1; }
+    .after { margin-top: 32px; max-width: 60ch; color: var(--muted); font-size: 17px; }
+    @media (max-width: 640px) { .barriers li { grid-template-columns: 1fr; gap: 6px; } }
+
+    /* audience tabs */
+    .tabs { display: flex; gap: 32px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+    .tab { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; min-height: 48px; padding: 8px 0; font-family: var(--font-display); font-size: clamp(20px, 2.2vw, 26px); color: var(--muted); }
+    .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+    .panel { display: grid; grid-template-columns: 0.9fr 1.6fr; gap: clamp(24px, 4vw, 56px); animation: rise .35s ease; }
+    .panel[hidden] { display: none; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .persona h3 { font-style: italic; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.2; }
+    .persona ul { list-style: none; padding: 0; margin: 22px 0 0; }
+    .persona li { padding: 10px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 15px; }
+    .offers { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+    .offer { padding: 18px 0 24px; border-top: 1px solid var(--border); }
+    .offer .num { font-size: 11px; color: var(--muted); }
+    .offer h4 { font-size: 22px; margin: 6px 0 6px; transition: color .15s; }
+    .offer:hover h4 { color: var(--accent); }
+    .offer p { color: var(--muted); font-size: 15px; }
+    .stages { margin-top: 48px; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+    .stages .meta { margin-right: 10px; }
+    .chip { font-size: 13px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); }
+    @media (max-width: 860px) { .panel { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .offers { grid-template-columns: 1fr; } .tabs { gap: 22px; } }
+
+    /* comparison */
+    .ledger { border-top: 1px solid var(--fg); border-bottom: 1px solid var(--fg); }
+    .ledger-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 0; }
+    .ledger-row + .ledger-row { border-top: 1px solid var(--border); }
+    .ledger-row .not { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in oklch, var(--muted) 55%, transparent); }
+    .ledger-row .is { font-family: var(--font-display); font-size: 19px; }
+    .ledger-head .not, .ledger-head .is { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; color: var(--muted); }
+    @media (max-width: 640px) { .ledger-head { display: none; } .ledger-row { grid-template-columns: 1fr; gap: 4px; } .ledger-row .not { font-size: 14px; } }
+
+    /* events */
+    .event { display: grid; grid-template-columns: 112px 1fr auto; gap: 28px; align-items: center; padding: 28px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .event .date { width: 104px; height: 104px; border: 1px dashed color-mix(in oklch, var(--muted) 50%, transparent); border-radius: 50%; display: grid; place-items: center; text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; line-height: 1.4; color: var(--muted); }
+    .event h3 { font-size: clamp(24px, 2.6vw, 32px); margin-top: 6px; }
+    .event .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 40px; }
+    .notes h4 { font-size: 19px; margin-bottom: 4px; }
+    .notes p { color: var(--muted); font-size: 15px; }
+    @media (max-width: 720px) { .event { grid-template-columns: 1fr; gap: 14px; } .event .date { width: auto; height: auto; border-radius: 999px; padding: 8px 14px; justify-self: start; } .event .btn { width: 100%; } .notes { grid-template-columns: 1fr; } }
+
+    /* how it works */
+    .how { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(28px, 5vw, 64px); align-items: start; }
+    .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+    .steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 18px 0; border-top: 1px solid var(--border); }
+    .steps li::before { content: counter(s, upper-roman) '.'; font-family: var(--font-display); font-style: italic; color: var(--muted); font-size: 18px; }
+    .steps h3 { font-size: 21px; }
+    .steps p { color: var(--muted); font-size: 15px; margin-top: 2px; }
+    .group { position: sticky; top: calc(var(--nav-h) + 32px); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; background: color-mix(in oklch, var(--surface) 60%, transparent); }
+    .group-ring { width: 100%; max-width: 240px; margin: 14px auto 18px; }
+    .group-ring circle.s { fill: transparent; stroke: color-mix(in oklch, var(--muted) 55%, transparent); stroke-dasharray: 2 3; transition: fill .4s, stroke .4s; transition-delay: calc(var(--i) * 80ms); }
+    .group.lit .group-ring circle.s.f { fill: var(--fg); stroke: var(--fg); stroke-dasharray: none; }
+    .group-ring .t { fill: color-mix(in oklch, var(--surface) 90%, transparent); stroke: var(--border); }
+    .group .big { font-family: var(--font-display); font-size: 48px; line-height: 1; }
+    .group p { color: var(--muted); font-size: 15px; margin-top: 8px; }
+    @media (max-width: 860px) { .how { grid-template-columns: 1fr; } .group { position: static; } }
+
+    .give { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .give li { border-top: 1px solid var(--fg); padding-top: 18px; }
+    .give h3 { font-style: italic; font-size: 26px; margin-bottom: 8px; }
+    .give p { color: var(--muted); font-size: 15px; }
+    @media (max-width: 760px) { .give { grid-template-columns: 1fr; } }
+
+    /* quote */
+    .quote { font-family: var(--font-display); font-style: italic; font-size: clamp(32px, 4.6vw, 64px); line-height: 1.1; letter-spacing: -0.015em; margin: 0; max-width: 20ch; }
+    .quote::before { content: '“'; display: block; color: var(--accent); font-size: 1.6em; line-height: .6; margin-bottom: 18px; }
+    .quote-author { margin-top: 26px; color: var(--muted); }
+
+    /* faq */
+    .faq-item { border-top: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: 1px solid var(--border); }
+    .faq-q { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 64px; padding: 18px 0; background: none; border: 0; text-align: left; font-family: var(--font-display); font-size: clamp(19px, 2vw, 24px); }
+    .faq-q:hover { color: var(--accent); }
+    .faq-q .ic { flex: none; width: 28px; height: 28px; position: relative; }
+    .faq-q .ic::before, .faq-q .ic::after { content: ''; position: absolute; left: 50%; top: 50%; width: 14px; height: 1.5px; background: currentColor; transform: translate(-50%, -50%); }
+    .faq-q .ic::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform .25s; }
+    .faq-q[aria-expanded="true"] .ic::after { transform: translate(-50%, -50%) rotate(0); }
+    .faq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .28s ease; }
+    .faq-a > div { overflow: hidden; }
+    .faq-a p { color: var(--muted); padding: 0 48px 22px 0; max-width: 64ch; }
+    .faq-item.open .faq-a { grid-template-rows: 1fr; }
+
+    /* closing chapter */
+    .closing { position: relative; overflow: hidden; }
+    .closing::before { content: ''; position: absolute; left: 50%; top: 0; width: 900px; max-width: 140%; aspect-ratio: 1; transform: translate(-50%, -45%); background: radial-gradient(closest-side, var(--accent-glow), transparent 70%); pointer-events: none; }
+    .closing .inner { position: relative; }
+    .closing h2 em { color: var(--muted); }
+    .join-steps { list-style: none; padding: 0; margin: 40px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .join-steps li { border-top: 1px solid var(--border); padding-top: 16px; }
+    .join-steps strong { display: block; font-family: var(--font-display); font-weight: 400; font-size: 21px; }
+    .join-steps span { color: var(--muted); font-size: 15px; }
+    .behind { margin-top: 56px; display: grid; grid-template-columns: auto 1fr; gap: 6px 28px; color: var(--muted); max-width: 70ch; }
+    @media (max-width: 760px) { .join-steps { grid-template-columns: 1fr; } .behind { grid-template-columns: 1fr; } }
+    @media (max-width: 480px) { .closing .cta-row .btn { flex: 1 1 100%; } }
+
+    .pagefoot { padding: 40px var(--gutter); border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+    /* ═══ 8. DIALOG ═══════════════════════════════════════════════════ */
+    dialog { border: 1px solid var(--border); padding: 0; border-radius: 8px; width: min(520px, calc(100vw - 24px)); background: var(--surface); color: var(--fg); box-shadow: 0 40px 100px -30px black; }
+    dialog::backdrop { background: color-mix(in oklch, var(--bg) 70%, transparent); backdrop-filter: blur(4px); }
+    dialog[open] { animation: rise .25s ease; }
+    .dlg { padding: clamp(22px, 4vw, 32px); }
+    .dlg-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+    .dlg-head h2 { font-size: 30px; }
+    .dlg-head p { color: var(--muted); font-size: 15px; margin-top: 6px; }
+    .x { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); background: transparent; font-size: 18px; }
+    .x:hover { border-color: var(--fg); }
+    .form { display: grid; gap: 14px; margin-top: 22px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 600; }
+    .field .opt { font-weight: 400; color: var(--muted); }
+    .input, .select, .textarea { width: 100%; min-height: 46px; padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--fg); font: inherit; font-size: 16px; }
+    .textarea { min-height: 88px; resize: vertical; }
+    .input:focus, .select:focus, .textarea:focus { outline: 3px solid var(--accent-soft); border-color: var(--accent); }
+    .field.err .input, .field.err .select { border-color: oklch(68% 0.16 25); }
+    .err-msg { display: none; font-size: 13px; color: oklch(76% 0.13 25); }
+    .field.err .err-msg { display: block; }
+    .form .btn-primary { width: 100%; margin-top: 6px; }
+    .fineprint { font-size: 13px; color: var(--muted); text-align: center; }
+    .done { text-align: center; padding: 16px 0 6px; }
+    .done .tick { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; font-size: 22px; box-shadow: 0 0 40px var(--accent-glow); }
+    .done h3 { font-size: 26px; }
+    .done p { color: var(--muted); margin: 8px auto 20px; max-width: 36ch; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+
+  <!-- ═══ TOP BAR ═══ -->
+  <header class="topnav" data-od-id="topnav">
+    <div class="topnav-inner">
+      <a href="#title" class="logo" aria-label="Guild Professional Networks, title page">
+        <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="7" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <g fill="currentColor"><circle cx="16" cy="3.5" r="2.3"/><circle cx="26.8" cy="9.8" r="2.3"/><circle cx="26.8" cy="22.2" r="2.3"/><circle cx="16" cy="28.5" r="2.3"/><circle cx="5.2" cy="22.2" r="2.3"/><circle cx="5.2" cy="9.8" r="2.3"/></g>
+        </svg>
+        <span>Guild <small>Professional Networks</small></span>
+      </a>
+      <p class="now" id="now" aria-live="polite"></p>
+      <div class="nav-actions">
+        <button class="btn btn-secondary btn-sm" data-open="event">Attend our next event</button>
+        <button class="btn btn-primary btn-sm" data-open="join">Join the Community</button>
+        <button class="menu-btn" id="menuBtn" aria-label="Open chapters" aria-expanded="false" aria-controls="drawer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="drawer" id="drawer" aria-label="Chapters"></nav>
+  </header>
+
+  <div class="book">
+    <!-- ═══ CHAPTER RAIL ═══ -->
+    <aside class="rail" aria-label="Chapters">
+      <p class="meta">Contents</p>
+      <ol class="toc" id="toc"></ol>
+      <p class="rail-foot"><strong>Free to join.</strong> Peer-led. No sales pitch waiting on the other side.</p>
+    </aside>
+
+    <main id="content" class="text">
+
+      <!-- ═══ TITLE PAGE ═══ -->
+      <section class="chapter title-page" id="title" data-od-id="hero" data-ch="—" data-title="Title page">
+        <div class="title-grid">
+          <div>
+            <p class="meta kicker">An evening among peers · Free to join</p>
+            <h1>Stop figuring it out alone. <em>Start growing with peers who've already done it.</em></h1>
+            <p class="lead">The community for those who do it, not just talk. Learn new things and solve real problems together, including how to put AI to work.</p>
+            <div class="cta-row">
+              <button class="btn btn-primary" data-open="join">Join the Community</button>
+              <button class="btn btn-secondary" data-open="event">Attend our next event</button>
+            </div>
+            <div class="assure"><span>Free, always</span><span>Run by peers, not a program</span><span>Every career stage</span></div>
+          </div>
+          <div class="table-wrap">
+            <svg class="table-svg" viewBox="0 0 400 400" role="img" aria-label="A round table under a lamp, twelve seats and no head of the table; one seat is open for you.">
+              <defs>
+                <radialGradient id="lamp" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="oklch(82% 0.11 82)" stop-opacity=".22"/>
+                  <stop offset="100%" stop-color="oklch(82% 0.11 82)" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <circle class="pool" cx="200" cy="200" r="200"/>
+              <circle class="tbl" cx="200" cy="200" r="116"/>
+              <text class="center-t" x="200" y="196" text-anchor="middle" font-size="27">No head</text>
+              <text class="center-t" x="200" y="228" text-anchor="middle" font-size="27">of the table.</text>
+              <text class="center-s" x="200" y="258" text-anchor="middle">EVERYONE LEARNS · EVERYONE GIVES</text>
+              <g id="seats"></g>
+            </svg>
+            <div class="invite">
+              <div class="when" aria-hidden="true">Date<br>TBC</div>
+              <div><span class="meta">Next event</span><strong>Agentic AI Software Engineering</strong></div>
+              <button class="btn btn-secondary btn-sm" data-open="event" aria-label="Attend Agentic AI Software Engineering">Attend</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ I ═══ -->
+      <section class="chapter" id="what" data-od-id="ch-what" data-ch="I" data-title="What is Guild?">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">I.</span><p class="meta">What is Guild?</p><h2>A self-managed peer community, not a course.</h2></header>
+          <div class="two-col">
+            <p>Guild Professional Networks is a home for self-managed peer communities of business leaders and professionals. We organize and facilitate professional networking, powered by an advanced AI technology platform.</p>
+            <p>Members spend their time solving real problems together rather than trying to separate real value from the noise. You make connections that turn into real partnerships, avoid the expensive mistakes of experimenting in isolation, and learn in weeks what would take months alone.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ II ═══ -->
+      <section class="chapter" id="barriers" data-od-id="ch-barriers" data-ch="II" data-title="What we remove">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">II.</span><p class="meta">What problems do we solve?</p><h2>We remove the three biggest barriers to learning.</h2></header>
+          <ol class="barriers" id="barrierList">
+            <li><span class="meta num">01</span><div><h3>The hype problem</h3></div><span class="tag">Removed</span></li>
+            <li><span class="meta num">02</span><div><h3>The speed bumps</h3></div><span class="tag">Removed</span></li>
+            <li><span class="meta num">03</span><div><h3>The practical implementation challenges</h3></div><span class="tag">Removed</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ═══ III ═══ -->
+      <section class="chapter" id="for-you" data-od-id="ch-for-you" data-ch="III" data-title="Who it's for">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">III.</span><p class="meta">What's in it for you</p><h2>If you're ready to move from theory to practice, you belong here.</h2></header>
+          <div class="tabs" role="tablist" aria-label="Choose your path">
+            <button class="tab" role="tab" id="tab-leaders" aria-controls="panel-leaders" aria-selected="true">For Leaders</button>
+            <button class="tab" role="tab" id="tab-pros" aria-controls="panel-pros" aria-selected="false" tabindex="-1">For Professionals</button>
+          </div>
+          <div class="panel" role="tabpanel" id="panel-leaders" aria-labelledby="tab-leaders">
+            <div class="persona">
+              <h3>Transform your organization with people who already have.</h3>
+              <ul><li>Transform your organization</li><li>Learn from peers who have already done it</li><li>Work with proven partners</li></ul>
+            </div>
+            <div class="offers">
+              <article class="offer"><span class="num">01</span><h4>Peer Benchmarking</h4><p>Compare yourself against other organizations and professionals.</p></article>
+              <article class="offer"><span class="num">02</span><h4>Proven Practitioner Access</h4><p>Learn from leaders who have already made the same transformation.</p></article>
+              <article class="offer"><span class="num">03</span><h4>Vetted Partner Network</h4><p>Find proven vendors, consultants, and coaches that other members already use.</p></article>
+              <article class="offer"><span class="num">04</span><h4>Research &amp; Resources</h4><p>Leverage our research, aggregated knowledge, and community-shared resources.</p></article>
+            </div>
+          </div>
+          <div class="panel" role="tabpanel" id="panel-pros" aria-labelledby="tab-pros" hidden>
+            <div class="persona">
+              <h3>Advance your career with peers a few steps ahead.</h3>
+              <ul><li>Advance in your career</li><li>Learn from peers a few steps ahead</li><li>Work with credible coaches</li></ul>
+            </div>
+            <div class="offers">
+              <article class="offer"><span class="num">01</span><h4>Mentor Matching</h4><p>Get matched with a mentor who has navigated the career path you're on.</p></article>
+              <article class="offer"><span class="num">02</span><h4>Working Groups</h4><p>Work alongside senior practitioners in a group of 8–15 members.</p></article>
+              <article class="offer"><span class="num">03</span><h4>Courses</h4><p>Access structured courses and pre-recorded content.</p></article>
+              <article class="offer"><span class="num">04</span><h4>AI-Powered Networking</h4><p>Grow your network through AI-powered matchmaking with other members.</p></article>
+              <article class="offer"><span class="num">05</span><h4>Reputation Building</h4><p>Establish your reputation through community contributions and engagements.</p></article>
+            </div>
+          </div>
+          <div class="stages" aria-label="Career stages Guild covers">
+            <span class="meta">Every stage</span>
+            <span class="chip">Internship</span><span class="chip">Contractor</span><span class="chip">Employee</span><span class="chip">Solopreneur</span><span class="chip">Manager</span><span class="chip">Executive</span><span class="chip">Owner</span><span class="chip">Board member</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ IV ═══ -->
+      <section class="chapter" id="different" data-od-id="ch-different" data-ch="IV" data-title="Why Guild is different">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">IV.</span><p class="meta">Why Guild is different</p><h2>Picturing a paid mastermind with a pitch at the end? Here's the difference.</h2></header>
+          <div class="ledger" role="table" aria-label="What Guild is not, and what it is">
+            <div class="ledger-row ledger-head" role="row"><span class="not" role="columnheader">What Guild is not</span><span class="is" role="columnheader">What Guild is</span></div>
+            <div class="ledger-row" role="row"><span class="not" role="cell">A one-time workshop or course</span><span class="is" role="cell">An ongoing network for every career stage</span></div>
+            <div class="ledger-row" role="row"><span class="not" role="cell">A paid mastermind or coaching program</span><span class="is" role="cell">Free to join, always</span></div>
+            <div class="ledger-row" role="row"><span class="not" role="cell">A sales funnel with a pitch at the end</span><span class="is" role="cell">No sales pitch waiting on the other side</span></div>
+            <div class="ledger-row" role="row"><span class="not" role="cell">Theoretical advice from people who haven't done it</span><span class="is" role="cell">Proven peer practitioners who've done it themselves</span></div>
+            <div class="ledger-row" role="row"><span class="not" role="cell">A vendor pitching their own agenda</span><span class="is" role="cell">Vetted partners other members already use. You choose who to work with</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ V ═══ -->
+      <section class="chapter" id="events" data-od-id="ch-events" data-ch="V" data-title="Join us live">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">V.</span><p class="meta">Upcoming events</p><h2>Join us live.</h2><p class="lead">The easiest way to meet Guild: come to a session, listen in, and decide for yourself.</p></header>
+          <article class="event">
+            <div class="date" aria-label="Date to be confirmed">Date<br>to be<br>confirmed</div>
+            <div>
+              <span class="meta">Public event · Next up</span>
+              <h3>Agentic AI Software Engineering</h3>
+              <div class="chips"><span class="chip">AI</span><span class="chip">Software engineering</span><span class="chip">Format TBC</span></div>
+            </div>
+            <button class="btn btn-primary" data-open="event">Attend our next event</button>
+          </article>
+          <div class="notes">
+            <div><h4>Missed a group session?</h4><p>Working-group members can access the event recordings.</p></div>
+            <div><h4>Want to present?</h4><p>Members can volunteer to speak at our public events.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ VI ═══ -->
+      <section class="chapter" id="how" data-od-id="ch-how" data-ch="VI" data-title="How it works">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">VI.</span><p class="meta">How it works</p><h2>From sign-up to your first event.</h2></header>
+          <div class="how">
+            <ol class="steps">
+              <li><div><h3>Sign up for free.</h3><p>No card, no sales call.</p></div></li>
+              <li><div><h3>Tell us about you.</h3><p>Fill out the form so we can understand your background, goals, and contributions to the community.</p></div></li>
+              <li><div><h3>Join a working group.</h3><p>Based on your industry, role, and goals, you'll be placed into a working group of 8–15 members.</p></div></li>
+              <li><div><h3>Attend the group events.</h3><p>Access the event recordings in case you missed one.</p></div></li>
+              <li><div><h3>Speak at our public events.</h3><p>Volunteer to speak when you're ready.</p></div></li>
+            </ol>
+            <aside class="group" id="group" aria-label="Working group size">
+              <span class="meta">Your working group</span>
+              <svg class="group-ring" viewBox="0 0 240 240" aria-hidden="true"><circle class="t" cx="120" cy="120" r="62"/><g id="groupSeats"></g></svg>
+              <div class="big num">8–15</div>
+              <p>members per group, matched on industry, role, and goals. Small enough that everyone talks.</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ VII ═══ -->
+      <section class="chapter" id="give" data-od-id="ch-give" data-ch="VII" data-title="What you give">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">VII.</span><p class="meta">What do I give?</p><h2>Everyone at the table brings something.</h2></header>
+          <ul class="give">
+            <li><h3>Contributor</h3><p>Share what's working and what's failing with peers in your industry or function.</p></li>
+            <li><h3>Speaker</h3><p>Prepare and present at our online and in-person events.</p></li>
+            <li><h3>Mentor</h3><p>Guide younger professionals on their career journey.</p></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ═══ VIII ═══ -->
+      <section class="chapter" id="voices" data-od-id="ch-quote" data-ch="VIII" data-title="What members say">
+        <div class="inner">
+          <header class="ch-head" style="margin-bottom:32px"><span class="ch-num">VIII.</span><p class="meta">What members say</p></header>
+          <blockquote class="quote">This knowledge base can be used for many things.</blockquote>
+          <p class="quote-author">— Ron Pruzinsky</p>
+        </div>
+      </section>
+
+      <!-- ═══ IX ═══ -->
+      <section class="chapter" id="faq" data-od-id="ch-faq" data-ch="IX" data-title="Questions">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">IX.</span><p class="meta">FAQ</p><h2>Questions, answered plainly.</h2></header>
+          <div id="faqList">
+            <div class="faq-item open"><button class="faq-q" aria-expanded="true" aria-controls="fa1" id="fq1">Is Guild free to join?<span class="ic" aria-hidden="true"></span></button><div class="faq-a" id="fa1" role="region" aria-labelledby="fq1"><div><p>Yes. Guild is free to join, with no sales pitch waiting on the other side.</p></div></div></div>
+            <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="fa2" id="fq2">Who is Guild for?<span class="ic" aria-hidden="true"></span></button><div class="faq-a" id="fa2" role="region" aria-labelledby="fq2"><div><p>Leaders who want to transform their organizations, and professionals who want to advance their careers, from interns and contractors through executives and board members.</p></div></div></div>
+            <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="fa3" id="fq3">How does it work?<span class="ic" aria-hidden="true"></span></button><div class="faq-a" id="fa3" role="region" aria-labelledby="fq3"><div><p>You sign up, tell us about your background and goals, and we place you into a working group of 8–15 members based on your industry, role, and goals. You attend group events (recordings are available if you miss one) and can volunteer to speak at public events.</p></div></div></div>
+            <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="fa4" id="fq4">Who moderates the working groups?<span class="ic" aria-hidden="true"></span></button><div class="faq-a" id="fa4" role="region" aria-labelledby="fq4"><div><p>Guild's founding members and community moderators facilitate each working group.</p></div></div></div>
+            <div class="faq-item"><button class="faq-q" aria-expanded="false" aria-controls="fa5" id="fq5">Who's behind Guild?<span class="ic" aria-hidden="true"></span></button><div class="faq-a" id="fa5" role="region" aria-labelledby="fq5"><div><p>Guild is organized and facilitated by its founding members: practitioners who build it the same way our members build their own work, in the open, alongside peers.</p></div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ X ═══ -->
+      <section class="chapter closing" id="join" data-od-id="ch-join" data-ch="X" data-title="Take your seat">
+        <div class="inner">
+          <header class="ch-head"><span class="ch-num">X.</span><p class="meta">Ready to join?</p><h2>Come work through real problems alongside peers <em>who are doing the same thing you are.</em></h2><p class="lead">Guild is built by its members, for its members. Free to join, with no sales pitch waiting on the other side.</p></header>
+          <div class="cta-row">
+            <button class="btn btn-primary" data-open="join">Join the Community</button>
+            <button class="btn btn-secondary" data-open="event">Attend our next event</button>
+          </div>
+          <ol class="join-steps" aria-label="What happens when you join">
+            <li><strong>Join in a minute.</strong><span>No sales call, no pitch waiting on the other side.</span></li>
+            <li><strong>Get full access.</strong><span>Peer benchmarking, mentor matching, working groups, and the rest of what's in it for you.</span></li>
+            <li><strong>Jump in.</strong><span>No gatekeeping, no upsell, just the community.</span></li>
+          </ol>
+          <div class="behind"><span class="meta">Who is behind this?</span><p>Guild is built and facilitated by its founding members and community moderators, in the open, alongside peers.</p></div>
+        </div>
+      </section>
+
+      <footer class="pagefoot" data-od-id="footer">
+        <span>© 2026 Guild Professional Networks</span>
+        <span class="meta">guildpn.com · Free to join, peer-led</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ═══ DIALOG — Join / Attend ═══ -->
+  <dialog id="dlg" aria-labelledby="dlgTitle">
+    <div class="dlg">
+      <div class="dlg-head">
+        <div><h2 id="dlgTitle">Join the Community</h2><p id="dlgSub"></p></div>
+        <button class="x" data-close aria-label="Close">×</button>
+      </div>
+      <form class="form" id="form" novalidate>
+        <div class="field" data-f="name"><label for="f-name">Full name</label><input class="input" id="f-name" name="name" autocomplete="name" /><span class="err-msg">Please add your name.</span></div>
+        <div class="field" data-f="email"><label for="f-email">Work or personal email</label><input class="input" id="f-email" name="email" type="email" autocomplete="email" inputmode="email" /><span class="err-msg">Please enter a valid email address.</span></div>
+        <div class="field join-only" data-f="path"><label for="f-path">I'm joining mainly as a…</label>
+          <select class="select" id="f-path" name="path"><option value="">Choose one</option><option>Leader: transforming my organization</option><option>Professional: advancing my career</option></select>
+          <span class="err-msg">Pick the path that fits best. You can change it later.</span></div>
+        <div class="field join-only"><label for="f-stage">Career stage <span class="opt">(optional)</span></label>
+          <select class="select" id="f-stage" name="stage"><option value="">Choose one</option><option>Internship</option><option>Contractor</option><option>Employee</option><option>Solopreneur</option><option>Manager</option><option>Executive</option><option>Owner</option><option>Board member</option></select></div>
+        <div class="field join-only"><label for="f-goals">What are you working on? <span class="opt">(optional)</span></label><textarea class="textarea" id="f-goals" name="goals" placeholder="e.g. rolling out AI tooling across a 40-person engineering team"></textarea></div>
+        <button class="btn btn-primary" type="submit" id="submitBtn">Join the Community</button>
+        <p class="fineprint" id="fine"></p>
+      </form>
+      <div class="done" id="done" hidden>
+        <div class="tick" aria-hidden="true">✓</div>
+        <h3 id="doneTitle"></h3>
+        <p id="doneText"></p>
+        <button class="btn btn-secondary" data-close>Back to the page</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════
+     JS — contents rail + drawer, reading progress, seats, tabs, FAQ,
+          join/attend dialog with validation
+     ═══════════════════════════════════════════════════════════════════ */
+  (() => {
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const NS = 'http://www.w3.org/2000/svg';
+
+    /* — Contents: built from chapters so rail + drawer never drift — */
+    const chapters = $$('.chapter[data-ch]').filter(c => c.dataset.ch !== '—');
+    const toc = $('#toc'), drawer = $('#drawer');
+    chapters.forEach(c => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="#${c.id}"><span class="seat" aria-hidden="true"></span><span class="num">${c.dataset.ch}</span><span>${c.dataset.title}</span></a>`;
+      toc.appendChild(li);
+      const d = document.createElement('a');
+      d.href = '#' + c.id;
+      d.innerHTML = `<span class="num">${c.dataset.ch}</span><span>${c.dataset.title}</span>`;
+      drawer.appendChild(d);
+    });
+    drawer.insertAdjacentHTML('beforeend', '<button class="btn btn-primary" data-open="join">Join the Community</button><button class="btn btn-secondary" data-open="event">Attend our next event</button>');
+
+    /* — Reading progress: current chapter lit, earlier ones filled — */
+    const tocLinks = $$('#toc a'), now = $('#now');
+    const setCurrent = (idx) => {
+      tocLinks.forEach((a, i) => { a.classList.toggle('read', i < idx); a.setAttribute('aria-current', i === idx ? 'true' : 'false'); });
+      if (idx >= 0) { now.innerHTML = `<span class="num">${chapters[idx].dataset.ch}</span>${chapters[idx].dataset.title}`; now.classList.add('on'); }
+      else now.classList.remove('on');
+    };
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        setCurrent(e.target.id === 'title' ? -1 : chapters.indexOf(e.target));
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    $$('.chapter').forEach(c => spy.observe(c));
+
+    /* — Drawer — */
+    const menuBtn = $('#menuBtn');
+    const setDrawer = open => { drawer.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', open); menuBtn.setAttribute('aria-label', open ? 'Close chapters' : 'Open chapters'); };
+    menuBtn.addEventListener('click', () => setDrawer(!drawer.classList.contains('open')));
+    drawer.addEventListener('click', e => { if (e.target.closest('a, button')) setDrawer(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setDrawer(false); });
+
+    /* — Title table: 12 seats under the lamp, one open — */
+    const seatG = $('#seats');
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+      const x = 200 + Math.cos(a) * 150, y = 200 + Math.sin(a) * 150;
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 14);
+      c.setAttribute('class', i === 4 ? 'seat mine' : 'seat');
+      c.style.setProperty('--i', i);
+      seatG.appendChild(c);
+      if (i === 4) {
+        const t = document.createElementNS(NS, 'text');
+        t.setAttribute('x', x + 22); t.setAttribute('y', y + 4);
+        t.setAttribute('class', 'your-label'); t.textContent = 'YOUR SEAT';
+        seatG.appendChild(t);
+      }
+    }
+
+    /* — Working group ring: 15 seats, 8 fill on view — */
+    const gs = $('#groupSeats');
+    for (let i = 0; i < 15; i++) {
+      const a = (i / 15) * Math.PI * 2 - Math.PI / 2;
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', 120 + Math.cos(a) * 94); c.setAttribute('cy', 120 + Math.sin(a) * 94); c.setAttribute('r', 11);
+      c.setAttribute('class', i < 8 ? 's f' : 's');
+      c.style.setProperty('--i', i);
+      gs.appendChild(c);
+    }
+
+    /* — Reveal-on-view: barriers strike, group fills — */
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        if (e.target.id === 'barrierList') $$('li', e.target).forEach((li, i) => setTimeout(() => li.classList.add('struck'), i * 300));
+        if (e.target.id === 'group') e.target.classList.add('lit');
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.4 });
+    io.observe($('#barrierList')); io.observe($('#group'));
+
+    /* — Audience tabs — */
+    const tabs = $$('[role="tab"]');
+    const select = t => tabs.forEach(x => {
+      const on = x === t;
+      x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+    });
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(t));
+      t.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+        select(n); n.focus();
+      });
+    });
+
+    /* — FAQ accordion — */
+    $$('.faq-q').forEach(q => q.addEventListener('click', () => {
+      const item = q.closest('.faq-item'), willOpen = !item.classList.contains('open');
+      $$('.faq-item').forEach(it => { it.classList.remove('open'); $('.faq-q', it).setAttribute('aria-expanded', 'false'); });
+      if (willOpen) { item.classList.add('open'); q.setAttribute('aria-expanded', 'true'); }
+    }));
+
+    /* — Dialog — */
+    const dlg = $('#dlg'), form = $('#form'), done = $('#done');
+    const MODES = {
+      join: { title: 'Join the Community', sub: 'Free, always. Tell us a little about you so we can match you to a working group.', cta: 'Join the Community', fine: 'No card. No sales call.', doneTitle: 'Your seat is at the table.', doneText: "We'll be in touch at your email to place you in a working group." },
+      event: { title: 'Attend our next event', sub: 'Agentic AI Software Engineering. Date and format to be confirmed. Save your seat and we’ll send the details.', cta: 'Save my seat', fine: 'Free. No membership needed to attend.', doneTitle: 'Your seat is saved.', doneText: "We'll email you the date and format for Agentic AI Software Engineering once confirmed." }
+    };
+    let mode = 'join';
+    const open = m => {
+      mode = m; const c = MODES[m];
+      $('#dlgTitle').textContent = c.title; $('#dlgSub').textContent = c.sub;
+      $('#submitBtn').textContent = c.cta; $('#fine').textContent = c.fine;
+      $('#doneTitle').textContent = c.doneTitle; $('#doneText').textContent = c.doneText;
+      $$('.join-only', form).forEach(f => f.hidden = m !== 'join');
+      form.reset(); $$('.field', form).forEach(f => f.classList.remove('err'));
+      form.hidden = false; done.hidden = true;
+      dlg.showModal(); setTimeout(() => $('#f-name').focus(), 30);
+    };
+    document.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) open(b.dataset.open); });
+    $$('[data-close]').forEach(b => b.addEventListener('click', () => dlg.close()));
+    dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+    const rules = {
+      name: v => v.trim().length > 1,
+      email: v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
+      path: v => mode !== 'join' || v !== ''
+    };
+    const check = f => {
+      const el = $('input, select', f), ok = rules[f.dataset.f](el.value);
+      f.classList.toggle('err', !ok); el.setAttribute('aria-invalid', !ok); return ok;
+    };
+    $$('[data-f]', form).forEach(f => ['input', 'blur'].forEach(ev => $('input, select', f).addEventListener(ev, () => { if (f.classList.contains('err')) check(f); })));
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const bad = $$('[data-f]', form).filter(f => !f.hidden).filter(f => !check(f));
+      if (bad.length) { $('input, select', bad[0]).focus(); return; }
+      const btn = $('#submitBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+      setTimeout(() => { btn.disabled = false; form.hidden = true; done.hidden = false; $('[data-close]', done).focus(); }, 650);
+    });
+  })();
+  </script>
+</body>
+</html>
